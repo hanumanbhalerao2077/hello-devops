@@ -23,14 +23,15 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh "sudo docker build -t $DOCKERHUB_USERNAME/$IMAGE_NAME:latest ."
+                // Jenkins container already has access to Docker socket
+                sh "docker build -t $DOCKERHUB_USERNAME/$IMAGE_NAME:latest ."
             }
         }
 
         stage('Push Docker Image') {
             steps {
                 withDockerRegistry([credentialsId: 'dockerhub-cred', url: '']) {
-                    sh "sudo docker push $DOCKERHUB_USERNAME/$IMAGE_NAME:latest"
+                    sh "docker push $DOCKERHUB_USERNAME/$IMAGE_NAME:latest"
                 }
             }
         }
