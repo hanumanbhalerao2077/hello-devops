@@ -15,15 +15,9 @@ pipeline {
             }
         }
 
-        stage('Install Dependencies') {
-            steps {
-                sh 'npm install'
-            }
-        }
-
         stage('Build Docker Image') {
             steps {
-                // Jenkins container already has access to Docker socket
+                // sudo nahi chahiye, docker socket already mounted
                 sh "docker build -t $DOCKERHUB_USERNAME/$IMAGE_NAME:latest ."
             }
         }
@@ -39,10 +33,10 @@ pipeline {
         stage('Deploy on EC2') {
             steps {
                 sh """
-                ssh -o StrictHostKeyChecking=no ubuntu@<EC2_PUBLIC_IP> \
-                'docker pull $DOCKERHUB_USERNAME/$IMAGE_NAME:latest && \
-                 docker stop hello-devops || true && \
-                 docker rm hello-devops || true && \
+                ssh -o StrictHostKeyChecking=no ubuntu@<EC2_PUBLIC_IP> \\
+                'docker pull $DOCKERHUB_USERNAME/$IMAGE_NAME:latest && \\
+                 docker stop hello-devops || true && \\
+                 docker rm hello-devops || true && \\
                  docker run -d -p 3000:3000 --name hello-devops $DOCKERHUB_USERNAME/$IMAGE_NAME:latest'
                 """
             }
